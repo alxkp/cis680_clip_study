@@ -1,0 +1,19 @@
+[project]
+name = "engineered-latents"
+version = "0.1.0"
+description = "Engineered Latents for CLIP via Nystrom algned cutting"
+readme = "README.md"
+requires-python = ">=3.10.13"
+dependencies = [
+    "einops",
+    "ncut-pytorch",
+    "lightning",
+    "torch",
+    "torchvision",
+    "transformers",
+    "datasets",
+    "matplotlib",
+    "tqdm",
+]
+
+[tool]
