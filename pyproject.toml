@@ -7,24 +7,30 @@ name = "engineered-latents"
 version = "0.1.0"
 description = "Engineered Latents for CLIP via Nystrom algned cutting"
 readme = "README.md"
-requires-python = ">=3.10.13"
+requires-python = ">=3.13"
 dependencies = [
-    "einops",
-    "ncut-pytorch",
-    "lightning",
-    "torch",
-    "torchvision",
-    "transformers",
-    "datasets",
-    "matplotlib",
-    "tqdm",
+    "aim>=2.7.4",
+    "datasets>=4.4.1",
+    "draccus>=0.11.5",
+    "einops>=0.8.1",
+    "lightning>=2.5.6",
+    "matplotlib>=3.10.7",
+    "ncut-pytorch>=2.3.0",
+    "torch>=2.9.1",
+    "torchvision>=0.24.1",
+    "tqdm>=4.67.1",
+    "transformers>=4.57.3",
 ]
+
+[dependency-groups]
+dev = ["pyrefly"]
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 
-[tool.ruff.lint]
+[tool.ruff.lint] 
 select = [
     "E",
     "F", 
@@ -38,6 +44,7 @@ select = [
     "PL",
     "TCH",
     "SIM",
+    "NPY",
 ]
 
 

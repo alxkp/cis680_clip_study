@@ -5,7 +5,7 @@ from typing import Any
 
 import torch
 from aim import Run  # type: ignore - this is a valid import
-from transformers import AutoModel, AutoProcessor, CLIPModel, CLIPProcessor
+from transformers import CLIPModel, CLIPProcessor
 
 from .config import ClipConfig
 
@@ -25,8 +25,8 @@ _aim_run: ContextVar[Run | None] = ContextVar("aim_run", default=None)
 def clip_context(cfg: ClipConfig):
     """Stores clip for use in different modules"""
 
-    model = AutoModel.from_pretrained(cfg.name)
-    processor = AutoProcessor.from_pretrained(cfg.name)
+    model: CLIPModel = CLIPModel.from_pretrained(cfg.name)
+    processor: CLIPProcessor = CLIPProcessor.from_pretrained(cfg.name)
 
     device = (
         "cuda"

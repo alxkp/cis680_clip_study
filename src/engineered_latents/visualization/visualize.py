@@ -15,7 +15,7 @@ def compare_correlation(clip_scores: ArrayLike, word_scores: ArrayLike):
 
     # Compare CLIP scores with each eigenvector
     for eig_idx in range(5):
-        correlations = []
+        correlations: list[float] = []
 
         for sample_idx in range(len(clip_scores)):
             clip_vals = clip_scores[sample_idx]["word_scores"].float().cpu().numpy()
