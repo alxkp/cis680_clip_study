@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "engineered-latents"
 version = "0.1.0"
@@ -16,4 +20,35 @@ dependencies = [
     "tqdm",
 ]
 
-[tool]
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F", 
+    "UP",
+    "I",
+    "C901",
+    "B",
+    "C4",
+    "RUF",
+    "PIE",
+    "PL",
+    "TCH",
+    "SIM",
+]
+
+
+ignore = [
+    "SIM103",   # return bool(x) — sometimes clearer to be explicit
+    "SIM110",   # any() — sometimes for loop is clearer
+    "SIM115",   # context manager for open — not always wanted
+    "PLR0913",  # too many args
+    "PLR2004",  # magic values
+    "E501", # line too long
+    "RUF009", # dataclass defaults are ok with draccus
+    "PLR0915", # too many statements in function
+    "PLW2901",  # loop var overwrite 
+]
