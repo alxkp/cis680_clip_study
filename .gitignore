@@ -12,3 +12,6 @@ wheels/
 # large files
 notebooks/
 reports/mid_progress_report.pdf
+
+# logs
+.aim/

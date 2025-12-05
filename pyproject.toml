@@ -7,10 +7,9 @@ name = "engineered-latents"
 version = "0.1.0"
 description = "Engineered Latents for CLIP via Nystrom algned cutting"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "aim>=2.7.4",
-    "datasets>=4.4.1",
+    "datasets>=2.14,<3.0",
     "draccus>=0.11.5",
     "einops>=0.8.1",
     "lightning>=2.5.6",
@@ -21,6 +20,7 @@ dependencies = [
     "tqdm>=4.67.1",
     "transformers>=4.57.3",
     "lovely-tensors>=0.1.20",
+    "aim>=3.29.0",
 ]
 
 [dependency-groups]
