@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from matplotlib import cm
 
-from engineered_latents.types import ArrayLike
+from engineered_latents.type_defs import ArrayLike
 from engineered_latents.utils import OUTPUT_DIR
 
 

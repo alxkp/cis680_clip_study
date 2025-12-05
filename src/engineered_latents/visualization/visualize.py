@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from engineered_latents.types import ArrayLike
+from engineered_latents.type_defs import ArrayLike
 
 
 def compare_correlation(clip_scores: ArrayLike, word_scores: ArrayLike):
