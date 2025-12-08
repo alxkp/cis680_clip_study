@@ -1,4 +1,3 @@
-from contextlib import nullcontext
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -260,20 +259,15 @@ def train_epoch(
     total_clip_score = 0.0
     n_batches = 0
 
-    # Use fp16 on CUDA for memory efficiency (bf16 doesn't support SVD)
-    use_amp = ctx.device.type == "cuda"
-    autocast_ctx = torch.autocast("cuda", dtype=torch.float16) if use_amp else nullcontext()
-
     pbar = tqdm(train_loader, desc=f"Train Epoch {epoch}")
     assert isinstance(pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
 
     for batch in pbar:
         optimizer.zero_grad()
 
-        with autocast_ctx:
-            image_features, text_features = extract_features(batch, ctx)
-            loss = compute_loss(image_features, text_features, cfg)
-            clip_score = compute_clip_score(image_features, text_features)
+        image_features, text_features = extract_features(batch, ctx)
+        loss = compute_loss(image_features, text_features, cfg)
+        clip_score = compute_clip_score(image_features, text_features)
 
         loss.backward()
 
@@ -302,17 +296,12 @@ def validate(val_loader, model: nn.Module, cfg: MainConfig) -> tuple[float, floa
     total_clip_score = 0.0
     n_batches = 0
 
-    # Use fp16 on CUDA for memory efficiency (bf16 doesn't support SVD)
-    use_amp = ctx.device.type == "cuda"
-    autocast_ctx = torch.autocast("cuda", dtype=torch.float16) if use_amp else nullcontext()
-
     val_pbar = tqdm(val_loader, desc="Validation")
     assert isinstance(val_pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
     for batch in val_pbar:
-        with autocast_ctx:
-            image_features, text_features = extract_features(batch, ctx)
-            loss = compute_loss(image_features, text_features, cfg)
-            clip_score = compute_clip_score(image_features, text_features)
+        image_features, text_features = extract_features(batch, ctx)
+        loss = compute_loss(image_features, text_features, cfg)
+        clip_score = compute_clip_score(image_features, text_features)
 
         total_loss += loss.item()
         total_clip_score += clip_score
