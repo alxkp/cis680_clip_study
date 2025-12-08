@@ -83,6 +83,50 @@ def cross_covariance_svd_loss(
     return alpha * gap_loss + beta * magnitude_loss
 
 
+def clip_svd_loss(
+    X: torch.Tensor,
+    Y: torch.Tensor,
+    k: int = 3,
+    alpha: float = 1.0,
+    beta: float = 0.5,
+    gamma: float = 1.0,
+    normalize: bool = True,
+) -> torch.Tensor:
+    """
+    Combined CLIP score + SVD loss.
+    Maximizes both pairwise alignment (CLIP score) and structured alignment (SVD).
+
+    X: [n_samples, d] - image features (should be pre-normalized)
+    Y: [n_samples, d] - text features (should be pre-normalized)
+    k: number of alignment directions to encourage
+    alpha: weight for spectral gap loss
+    beta: weight for magnitude loss
+    gamma: weight for CLIP score loss
+    normalize: whether to L2-normalize features for SVD computation
+
+    Returns: combined loss (minimize to maximize alignment)
+    """
+    # CLIP score: mean cosine similarity of paired embeddings
+    # X and Y should already be normalized, so dot product = cosine similarity
+    clip_similarities = (X * Y).sum(dim=-1)
+    clip_loss = -gamma * clip_similarities.mean()
+
+    # SVD loss on cross-covariance
+    if normalize:
+        X_norm = X / (X.norm(dim=-1, keepdim=True) + 1e-8)
+        Y_norm = Y / (Y.norm(dim=-1, keepdim=True) + 1e-8)
+    else:
+        X_norm, Y_norm = X, Y
+
+    C = X_norm.T @ Y_norm
+    S = torch.linalg.svdvals(C)
+
+    gap_loss = -(S[k - 1] - S[k])
+    magnitude_loss = -S[:k].sum()
+
+    return clip_loss + alpha * gap_loss + beta * magnitude_loss
+
+
 def ncut_cluster_loss(
     eigenvalues: ArrayLike, k: int = 3, alpha: float = 1.0, beta: float = 0.5
 ) -> torch.Tensor:

@@ -1,5 +1,5 @@
 mode = "train"
-experiment = "coco_svd"
+experiment = "coco_clip_svd"
 seed = 42
 
 [model]
@@ -24,10 +24,11 @@ early_stopping_patience = 15
 val_every_n_epochs = 1
 
 [train.loss]
-type = "svd"
+type = "clip_svd"
 k = 3
 alpha = 1.0
 beta = 0.5
+gamma = 1.0
 normalize = true
 
 [checkpoint]

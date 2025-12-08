@@ -13,6 +13,7 @@ from engineered_latents.benchmarking import print_benchmark_summary, run_all_ben
 from engineered_latents.config import (
     CKALossConfig,
     ClipConfig,
+    ClipSVDLossConfig,
     MainConfig,
     NCutLossConfig,
     SVDLossConfig,
@@ -21,6 +22,7 @@ from engineered_latents.context import aim_context, clip_context, get_clip, trac
 from engineered_latents.data import create_loaders
 from engineered_latents.losses.cluster_loss import (
     cka_alignment_loss,
+    clip_svd_loss,
     cross_covariance_svd_loss,
 )
 from engineered_latents.visualization import log_ncut_visualization
@@ -138,6 +140,16 @@ def compute_loss(
             k=loss_cfg.k,
             alpha=loss_cfg.alpha,
             beta=loss_cfg.beta,
+        )
+    elif isinstance(loss_cfg, ClipSVDLossConfig):
+        return clip_svd_loss(
+            image_features,
+            text_features,
+            k=loss_cfg.k,
+            alpha=loss_cfg.alpha,
+            beta=loss_cfg.beta,
+            gamma=loss_cfg.gamma,
+            normalize=loss_cfg.normalize,
         )
     else:
         raise ValueError(f"Unknown loss config: {loss_cfg}")

@@ -72,6 +72,19 @@ class NCutLossConfig(LossConfig):
 
 
 @dataclass
+@LossConfig.register_subclass("clip_svd")
+class ClipSVDLossConfig(LossConfig):
+    """Combined CLIP score + SVD loss."""
+
+    name: str = "clip_svd"
+    k: int = 3
+    alpha: float = 1.0  # spectral gap weight
+    beta: float = 0.5   # magnitude weight
+    gamma: float = 1.0  # CLIP score weight
+    normalize: bool = True
+
+
+@dataclass
 class CheckpointConfig:
     """Checkpointing configuration."""
 
