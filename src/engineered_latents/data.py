@@ -11,10 +11,7 @@ def create_loaders(cfg: DatasetConfig) -> tuple[DataLoader[Any], DataLoader[Any]
     train_ds = load_dataset(cfg.name, split=cfg.train_split, trust_remote_code=True)
     val_ds = load_dataset(cfg.name, split=cfg.val_split, trust_remote_code=True)
 
-    # Apply preprocessing
-    train_ds = train_ds.map(cfg.preprocess)  # type: ignore[union-attr]
-    val_ds = val_ds.map(cfg.preprocess)  # type: ignore[union-attr]
-
+    # Preprocessing happens in collate_fn (on-the-fly per batch)
     train_loader: DataLoader[Any] = DataLoader(
         train_ds,  # type: ignore[arg-type]
         batch_size=cfg.batch_size,

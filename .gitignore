@@ -16,6 +16,9 @@ reports/mid_progress_report.pdf
 # logs
 .aim/
 
+# checkpoints
+out/checkpoints/
+
 # ds stores
 .DS_Store
 src/.DS_Store

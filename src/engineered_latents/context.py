@@ -28,12 +28,12 @@ def clip_context(cfg: ClipConfig):
     model: CLIPModel = CLIPModel.from_pretrained(cfg.name)
     processor: CLIPProcessor = CLIPProcessor.from_pretrained(cfg.name)
 
-    device = (
-        "cuda"
-        if torch.cuda.is_available()
-        else ("mps" if torch.backends.mps.is_available() else "cpu")
-    )
-    device = torch.device(device)
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
 
     token = _clip_ctx.set(ClipContext(model, processor, device))
 

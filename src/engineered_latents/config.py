@@ -126,15 +126,10 @@ class WinogroundConfig(DatasetConfig):
     train_split: str = "test"
     val_split: str = "test"
 
-    def preprocess(self, example: dict[str, Any]) -> dict[str, Any]:
-        example["image_0"] = preprocess_image(example["image_0"])
-        example["image_1"] = preprocess_image(example["image_1"])
-        return example
-
     def collate_fn(self, batch: list[dict[str, Any]]) -> dict[str, Any]:
         return {
-            "image_0": torch.stack([x["image_0"] for x in batch]),
-            "image_1": torch.stack([x["image_1"] for x in batch]),
+            "image_0": [x["image_0"].convert("RGB") for x in batch],
+            "image_1": [x["image_1"].convert("RGB") for x in batch],
             "caption_0": [x["caption_0"] for x in batch],
             "caption_1": [x["caption_1"] for x in batch],
         }
@@ -147,14 +142,11 @@ class WhatsupAllConfig(DatasetConfig):
     train_split: str = "COCO_QA_one_obj"
     val_split: str = "COCO_QA_one_obj"
 
-    def preprocess(self, example: dict[str, Any]) -> dict[str, Any]:
-        example["image_options"] = preprocess_image(example["image_options"])
-        return example
-
     def collate_fn(self, batch: list[dict[str, Any]]) -> dict[str, Any]:
+        img = [x["image_options"].convert("RGB") for x in batch]
         return {
-            "image_0": torch.stack([x["image_options"] for x in batch]),
-            "image_1": torch.stack([x["image_options"] for x in batch]),
+            "image_0": img,
+            "image_1": img,
             "caption_0": [x["caption_options"][0] for x in batch],
             "caption_1": [x["caption_options"][1] for x in batch],
         }
@@ -169,13 +161,9 @@ class COCOCaptionsConfig(DatasetConfig):
     train_split: str = "train"
     val_split: str = "test"
 
-    def preprocess(self, example: dict[str, Any]) -> dict[str, Any]:
-        example["image"] = preprocess_image(example["image"])
-        return example
-
     def collate_fn(self, batch: list[dict[str, Any]]) -> dict[str, Any]:
         return {
-            "images": torch.stack([x["image"] for x in batch]),
+            "images": [x["image"].convert("RGB") for x in batch],
             "captions": [x["sentences"]["raw"][0] for x in batch],  # first caption
         }
 
@@ -189,13 +177,9 @@ class Flickr30KConfig(DatasetConfig):
     train_split: str = "train"
     val_split: str = "test"
 
-    def preprocess(self, example: dict[str, Any]) -> dict[str, Any]:
-        example["image"] = preprocess_image(example["image"])
-        return example
-
     def collate_fn(self, batch: list[dict[str, Any]]) -> dict[str, Any]:
         return {
-            "images": torch.stack([x["image"] for x in batch]),
+            "images": [x["image"].convert("RGB") for x in batch],
             "captions": [x["caption"][0] for x in batch],  # first caption
         }
 

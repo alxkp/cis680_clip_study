@@ -239,17 +239,25 @@ def extract_features(batch: dict, ctx) -> tuple[torch.Tensor, torch.Tensor]:
     return image_features, text_features
 
 
+def compute_clip_score(image_features: torch.Tensor, text_features: torch.Tensor) -> float:
+    """Compute mean CLIP score (cosine similarity) for paired image-text embeddings."""
+    # Features are already normalized, so dot product = cosine similarity
+    similarities = (image_features * text_features).sum(dim=-1)
+    return similarities.mean().item()
+
+
 def train_epoch(
     train_loader,
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
     cfg: MainConfig,
     epoch: int,
-) -> float:
-    """Run one training epoch. Returns average loss."""
+) -> tuple[float, float]:
+    """Run one training epoch. Returns (avg_loss, avg_clip_score)."""
     model.train()
     ctx = get_clip()
     total_loss = 0.0
+    total_clip_score = 0.0
     n_batches = 0
 
     # Use bf16 on CUDA for memory efficiency
@@ -265,6 +273,7 @@ def train_epoch(
         with autocast_ctx:
             image_features, text_features = extract_features(batch, ctx)
             loss = compute_loss(image_features, text_features, cfg)
+            clip_score = compute_clip_score(image_features, text_features)
 
         loss.backward()
 
@@ -277,18 +286,20 @@ def train_epoch(
         optimizer.step()
 
         total_loss += loss.item()
+        total_clip_score += clip_score
         n_batches += 1
-        pbar.set_postfix(loss=loss.item())
+        pbar.set_postfix(loss=loss.item(), clip=clip_score)
 
-    return total_loss / max(n_batches, 1)
+    return total_loss / max(n_batches, 1), total_clip_score / max(n_batches, 1)
 
 
 @torch.no_grad()
-def validate(val_loader, model: nn.Module, cfg: MainConfig) -> float:
-    """Run validation. Returns average loss."""
+def validate(val_loader, model: nn.Module, cfg: MainConfig) -> tuple[float, float]:
+    """Run validation. Returns (avg_loss, avg_clip_score)."""
     model.eval()
     ctx = get_clip()
     total_loss = 0.0
+    total_clip_score = 0.0
     n_batches = 0
 
     # Use bf16 on CUDA for memory efficiency
@@ -301,11 +312,13 @@ def validate(val_loader, model: nn.Module, cfg: MainConfig) -> float:
         with autocast_ctx:
             image_features, text_features = extract_features(batch, ctx)
             loss = compute_loss(image_features, text_features, cfg)
+            clip_score = compute_clip_score(image_features, text_features)
 
         total_loss += loss.item()
+        total_clip_score += clip_score
         n_batches += 1
 
-    return total_loss / max(n_batches, 1)
+    return total_loss / max(n_batches, 1), total_clip_score / max(n_batches, 1)
 
 
 def run_training(cfg: MainConfig) -> None:
@@ -328,20 +341,22 @@ def run_training(cfg: MainConfig) -> None:
 
     for epoch in range(start_epoch, cfg.train.n_epochs):
         # Training
-        train_loss = train_epoch(train_loader, model, optimizer, cfg, epoch)
+        train_loss, train_clip = train_epoch(train_loader, model, optimizer, cfg, epoch)
         track(train_loss, "train/loss", step=epoch)
+        track(train_clip, "train/clip_score", step=epoch)
         track(optimizer.param_groups[0]["lr"], "train/lr", step=epoch)
 
         if epoch % cfg.print_every_n == 0:
-            print(f"Epoch {epoch}: train_loss={train_loss:.4f}")
+            print(f"Epoch {epoch}: train_loss={train_loss:.4f}, clip={train_clip:.4f}")
 
         # Validation
         if epoch % cfg.train.val_every_n_epochs == 0:
-            val_loss = validate(val_loader, model, cfg)
+            val_loss, val_clip = validate(val_loader, model, cfg)
             track(val_loss, "val/loss", step=epoch)
+            track(val_clip, "val/clip_score", step=epoch)
 
             if epoch % cfg.print_every_n == 0:
-                print(f"Epoch {epoch}: val_loss={val_loss:.4f}")
+                print(f"Epoch {epoch}: val_loss={val_loss:.4f}, clip={val_clip:.4f}")
 
             # Check for improvement
             is_best = val_loss < best_val_loss
