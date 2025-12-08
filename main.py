@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -251,14 +252,19 @@ def train_epoch(
     total_loss = 0.0
     n_batches = 0
 
+    # Use bf16 on CUDA for memory efficiency
+    use_amp = ctx.device.type == "cuda"
+    autocast_ctx = torch.autocast("cuda", dtype=torch.bfloat16) if use_amp else nullcontext()
+
     pbar = tqdm(train_loader, desc=f"Train Epoch {epoch}")
-    assert isinstance(pbar, tqdm) # HACK: another fix - if this breaks, we have problems anyway
+    assert isinstance(pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
 
     for batch in pbar:
         optimizer.zero_grad()
 
-        image_features, text_features = extract_features(batch, ctx)
-        loss = compute_loss(image_features, text_features, cfg)
+        with autocast_ctx:
+            image_features, text_features = extract_features(batch, ctx)
+            loss = compute_loss(image_features, text_features, cfg)
 
         loss.backward()
 
@@ -285,11 +291,16 @@ def validate(val_loader, model: nn.Module, cfg: MainConfig) -> float:
     total_loss = 0.0
     n_batches = 0
 
+    # Use bf16 on CUDA for memory efficiency
+    use_amp = ctx.device.type == "cuda"
+    autocast_ctx = torch.autocast("cuda", dtype=torch.bfloat16) if use_amp else nullcontext()
+
     val_pbar = tqdm(val_loader, desc="Validation")
-    assert isinstance(val_pbar, tqdm) # HACK: another fix - if this breaks, we have problems anyway
+    assert isinstance(val_pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
     for batch in val_pbar:
-        image_features, text_features = extract_features(batch, ctx)
-        loss = compute_loss(image_features, text_features, cfg)
+        with autocast_ctx:
+            image_features, text_features = extract_features(batch, ctx)
+            loss = compute_loss(image_features, text_features, cfg)
 
         total_loss += loss.item()
         n_batches += 1
