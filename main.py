@@ -260,9 +260,9 @@ def train_epoch(
     total_clip_score = 0.0
     n_batches = 0
 
-    # Use bf16 on CUDA for memory efficiency
+    # Use fp16 on CUDA for memory efficiency (bf16 doesn't support SVD)
     use_amp = ctx.device.type == "cuda"
-    autocast_ctx = torch.autocast("cuda", dtype=torch.bfloat16) if use_amp else nullcontext()
+    autocast_ctx = torch.autocast("cuda", dtype=torch.float16) if use_amp else nullcontext()
 
     pbar = tqdm(train_loader, desc=f"Train Epoch {epoch}")
     assert isinstance(pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
@@ -302,9 +302,9 @@ def validate(val_loader, model: nn.Module, cfg: MainConfig) -> tuple[float, floa
     total_clip_score = 0.0
     n_batches = 0
 
-    # Use bf16 on CUDA for memory efficiency
+    # Use fp16 on CUDA for memory efficiency (bf16 doesn't support SVD)
     use_amp = ctx.device.type == "cuda"
-    autocast_ctx = torch.autocast("cuda", dtype=torch.bfloat16) if use_amp else nullcontext()
+    autocast_ctx = torch.autocast("cuda", dtype=torch.float16) if use_amp else nullcontext()
 
     val_pbar = tqdm(val_loader, desc="Validation")
     assert isinstance(val_pbar, tqdm)  # HACK: another fix - if this breaks, we have problems anyway
