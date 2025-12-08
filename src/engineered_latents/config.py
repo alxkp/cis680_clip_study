@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
@@ -8,6 +9,8 @@ import torch
 from draccus import ChoiceRegistry
 from einops import rearrange
 from PIL import Image
+
+from .utils import OUTPUT_DIR
 
 
 def preprocess_image(img: Image.Image, size: int = 224) -> torch.Tensor:
@@ -30,10 +33,72 @@ class ClipConfig(ModelConfig):
 
 
 @dataclass
+class LossConfig(ChoiceRegistry):
+    """Base class for loss function configuration."""
+
+    name: str
+
+
+@dataclass
+@LossConfig.register_subclass("cka")
+class CKALossConfig(LossConfig):
+    """CKA alignment loss."""
+
+    name: str = "cka"
+    center: bool = True
+
+
+@dataclass
+@LossConfig.register_subclass("svd")
+class SVDLossConfig(LossConfig):
+    """Cross-covariance SVD loss."""
+
+    name: str = "svd"
+    k: int = 3
+    alpha: float = 1.0
+    beta: float = 0.5
+    normalize: bool = True
+
+
+@dataclass
+@LossConfig.register_subclass("ncut")
+class NCutLossConfig(LossConfig):
+    """Normalized cut cluster loss."""
+
+    name: str = "ncut"
+    k: int = 3
+    alpha: float = 1.0
+    beta: float = 0.5
+
+
+@dataclass
+class CheckpointConfig:
+    """Checkpointing configuration."""
+
+    save_dir: Path = field(default_factory=lambda: OUTPUT_DIR / "checkpoints")
+    save_every_n_epochs: int = 10
+    save_best: bool = True
+    max_checkpoints: int = 3  # keep only N most recent checkpoints
+
+
+@dataclass
 class TrainConfig:
     lr: float = 1e-4
-    n_epochs = 100
-    optimizer: Literal["adam", "adamw"] = "adamw"
+    n_epochs: int = 100
+    optimizer: Literal["adam", "adamw", "sgd"] = "adamw"
+    weight_decay: float = 0.01
+    # Scheduler
+    scheduler: Literal["cosine", "linear", "constant"] = "cosine"
+    warmup_epochs: int = 5
+    min_lr: float = 1e-6
+    # Gradient clipping
+    grad_clip_norm: float | None = 1.0
+    # Early stopping
+    early_stopping_patience: int | None = 10  # None to disable
+    # Validation
+    val_every_n_epochs: int = 1
+    # Loss
+    loss: LossConfig = field(default_factory=lambda: CKALossConfig())
 
 
 @dataclass
@@ -136,10 +201,32 @@ class Flickr30KConfig(DatasetConfig):
 
 
 @dataclass
+class EvalConfig:
+    """Evaluation/benchmarking configuration."""
+
+    include_winoground: bool = True
+    include_coco: bool = True
+    include_flickr: bool = False
+    include_imagenet: bool = False
+    batch_size: int = 32
+    max_samples: int | None = None  # None for full dataset
+
+
+@dataclass
 class MainConfig:
-    experiment: str = f"engineered_latents_{datetime.now().strftime('%Y%m%d_%H%M%S')}"  # TODO: add timedate
+    # Run mode
+    mode: Literal["train", "eval"] = "eval"
+    experiment: str = field(
+        default_factory=lambda: f"engineered_latents_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    )
+
+    # Sub-configs
     model: ModelConfig = field(default_factory=lambda: ClipConfig())
     dataset: DatasetConfig = field(default_factory=lambda: WinogroundConfig())
     train: TrainConfig = field(default_factory=lambda: TrainConfig())
+    checkpoint: CheckpointConfig = field(default_factory=lambda: CheckpointConfig())
+    eval: EvalConfig = field(default_factory=lambda: EvalConfig())
 
+    # Logging
     print_every_n: int = 10
+    seed: int = 42

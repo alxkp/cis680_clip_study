@@ -15,3 +15,8 @@ reports/mid_progress_report.pdf
 
 # logs
 .aim/
+
+# ds stores
+.DS_Store
+src/.DS_Store
+src/engineered_latents/.DS_Store

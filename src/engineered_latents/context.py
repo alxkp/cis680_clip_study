@@ -54,6 +54,9 @@ def get_clip() -> ClipContext:
 @contextmanager
 def aim_context(repo: str, experiment: str, **run_kwargs):
     run = Run(repo=repo, experiment=experiment, **run_kwargs)
+    assert isinstance(
+        run, Run
+    )  # naive way to do this, but it should always work, and if it doesnt we have problems anyway
     token = _aim_run.set(run)
 
     try:

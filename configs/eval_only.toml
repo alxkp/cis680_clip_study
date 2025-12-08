@@ -1,0 +1,19 @@
+mode = "eval"
+experiment = "eval_baseline"
+seed = 42
+
+[model]
+type = "clip32"
+name = "openai/clip-vit-base-patch32"
+
+[dataset]
+type = "winoground"
+batch_size = 32
+
+[eval]
+include_winoground = true
+include_coco = true
+include_flickr = false
+include_imagenet = false
+batch_size = 64
+max_samples = 1000
