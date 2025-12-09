@@ -3,7 +3,7 @@ Standard CLIP benchmarking functions.
 Supports retrieval (COCO, Flickr30K), zero-shot classification, and Winoground.
 """
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -23,9 +23,9 @@ from .metrics import (
 )
 
 
-def tqdm[T](iterable: Iterable[T], desc: str = "") -> Iterator[T]:
+def tqdm[T](iterable: Iterable[T], desc: str = "") -> Iterable[T]:
     """Typed progress bar wrapper."""
-    return cast("Iterator[T]", _tqdm(iterable, desc=desc))
+    return cast("Iterable[T]", _tqdm(iterable, desc=desc))
 
 
 # -----------------------------------------------------------------------------
@@ -330,7 +330,8 @@ def run_winoground_benchmark(batch_size: int = 32) -> WinogroundMetrics:
     scores_c1_i0: list[float] = []
     scores_c1_i1: list[float] = []
 
-    for i in tqdm(range(len(samples)), desc="Evaluating Winoground"):
+    winoground_pbar: Iterable[int] = tqdm(range(len(samples)), desc="Evaluating Winoground")
+    for i in winoground_pbar:
         sample = samples[i]
         image_0 = sample["image_0"].convert("RGB")
         image_1 = sample["image_1"].convert("RGB")

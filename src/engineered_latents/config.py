@@ -79,7 +79,7 @@ class ClipSVDLossConfig(LossConfig):
     name: str = "clip_svd"
     k: int = 3
     alpha: float = 1.0  # spectral gap weight
-    beta: float = 0.5   # magnitude weight
+    beta: float = 0.5  # magnitude weight
     gamma: float = 1.0  # CLIP score weight
     normalize: bool = True
 
@@ -207,6 +207,7 @@ class EvalConfig:
     include_imagenet: bool = False
     batch_size: int = 32
     max_samples: int | None = None  # None for full dataset
+    checkpoint_path: Path | None = None  # Path to checkpoint for evaluation
 
 
 @dataclass

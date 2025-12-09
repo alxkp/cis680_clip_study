@@ -18,6 +18,7 @@ reports/mid_progress_report.pdf
 
 # checkpoints
 out/checkpoints/
+checkpoints/
 
 # ds stores
 .DS_Store

@@ -21,6 +21,7 @@ dependencies = [
     "transformers>=4.57.3",
     "lovely-tensors>=0.1.20",
     "aim>=3.29.0",
+    "beartype>=0.22.8",
 ]
 
 [dependency-groups]

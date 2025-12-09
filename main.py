@@ -393,6 +393,18 @@ def run_training(cfg: MainConfig) -> None:
 
 def run_eval(cfg: MainConfig, step: int | None = None) -> None:
     """Run benchmarks on the model."""
+    # Load checkpoint if specified
+    if cfg.eval.checkpoint_path is not None:
+        ckpt_path = cfg.eval.checkpoint_path
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+
+        print(f"Loading checkpoint: {ckpt_path}")
+        ctx = get_clip()
+        checkpoint = torch.load(ckpt_path, weights_only=False, map_location=ctx.device)
+        ctx.model.load_state_dict(checkpoint["model_state_dict"])
+        print(f"Loaded checkpoint from epoch {checkpoint.get('epoch', 'unknown')}")
+
     results = run_all_benchmarks(
         include_winoground=cfg.eval.include_winoground,
         include_coco=cfg.eval.include_coco,
