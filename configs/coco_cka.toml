@@ -1,0 +1,40 @@
+mode = "train"
+experiment = "coco_cka"
+seed = 42
+
+[model]
+type = "clip32"
+name = "openai/clip-vit-base-patch32"
+
+[dataset]
+type = "coco_captions"
+batch_size = 512
+num_loaders = 16
+
+[train]
+lr = 5e-5
+n_epochs = 100
+optimizer = "adamw"
+weight_decay = 0.01
+scheduler = "cosine"
+warmup_epochs = 10
+min_lr = 1e-6
+grad_clip_norm = 1.0
+early_stopping_patience = 15
+val_every_n_epochs = 1
+
+[train.loss]
+type = "cka"
+center = true
+
+[checkpoint]
+save_every_n_epochs = 10
+save_best = true
+max_checkpoints = 3
+
+[eval]
+include_winoground = true
+include_coco = true
+include_flickr = false
+include_imagenet = false
+batch_size = 32
