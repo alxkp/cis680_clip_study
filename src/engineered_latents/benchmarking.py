@@ -330,7 +330,9 @@ def run_winoground_benchmark(batch_size: int = 32) -> WinogroundMetrics:
     scores_c1_i0: list[float] = []
     scores_c1_i1: list[float] = []
 
-    winoground_pbar: Iterable[int] = tqdm(range(len(samples)), desc="Evaluating Winoground")
+    winoground_pbar: Iterable[int] = tqdm(
+        range(len(samples)), desc="Evaluating Winoground"
+    )
     for i in winoground_pbar:
         sample = samples[i]
         image_0 = sample["image_0"].convert("RGB")

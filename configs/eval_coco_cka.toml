@@ -1,0 +1,15 @@
+mode = "eval"
+experiment = "eval_coco_cka"
+seed = 42
+
+[model]
+type = "clip32"
+name = "openai/clip-vit-base-patch32"
+
+[eval]
+checkpoint_path = "checkpoints/coco_cka/best.pt"
+include_winoground = true
+include_coco = true
+include_flickr = false
+include_imagenet = false
+batch_size = 32
