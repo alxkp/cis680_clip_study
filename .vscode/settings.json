@@ -19,5 +19,23 @@
         "titleBar.inactiveBackground": "#b68dc999",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#b68dc9"
+    "peacock.color": "#b68dc9",
+    "cSpell.words": [
+        "DCSM",
+        "densification",
+        "eprinttype",
+        "gandelsman",
+        "interpretability",
+        "kang",
+        "langid",
+        "Llava",
+        "MSCOCO",
+        "NCUT",
+        "radford",
+        "shinn",
+        "shorttitle",
+        "tishby",
+        "Winoground",
+        "zhai"
+    ]
 }
